@@ -101,3 +101,9 @@ ENV/
 .mypy_cache/
 
 test.py
+
+testing.py
+
+input.py
+
+output.py

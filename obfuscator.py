@@ -1,24 +1,24 @@
 #!/usr/bin/python
+'''
+Python Code Obfuscator
+by Brandon Asuncion
+	me@brandonasuncion.tech
+'''
 
 import string
-import re
-from os import system
-import subprocess
+import sys
 
 # How strings are encoded
 #	Turning off will remove all numbers in the code,
 #	but will increase output size by a lot!
-USE_HEXSTRINGS = False
+USE_HEXSTRINGS = True
 
 # Remove comments from code
 REMOVE_COMMENTS = True
 
 # Obfuscate Python's built-in function calls
-# 	Note: may make code large
-OBFUSCATE_BUILTINS = True
-
-# Force using no header variables
-FORCE_NO_HEADER = False
+# 	Note: Code output will be large!
+OBFUSCATE_BUILTINS = False
 
 # Special code replacements
 REPLACEMENTS = {
@@ -29,7 +29,9 @@ REPLACEMENTS = {
 # Name of variable for internal actions (such as string decryption)
 RESERVED_VAR = "__RSV"
 
-RESERVED = [
+BUILTINS_CONST = "__B"
+
+_RESERVED = [
 	# Python reserved keywords
 	'None', 'and', 'as', 'assert', 'break', 'class', 'continue',
 	'def', 'del', 'elif', 'else', 'except', 'finally', 'for', 'from',
@@ -39,7 +41,7 @@ RESERVED = [
 
 # Python Built-in functions
 # can be called like: getattr(__import__('builtins'), 'abs')(1)
-BUILT_IN = [
+_BUILT_IN = [
 	'abs', 'dict', 'help', 'min', 'setattr',
 	'all', 'dir', 'hex', 'next', 'slice',
 	'any', 'divmod', 'id', 'object', 'sorted',
@@ -59,279 +61,282 @@ BUILT_IN = [
 # Might not be a complete list...
 PREPAD = [';', ':', '=', '+', '-', '*', '%', '^', '<<', '>>', '|', '^', '/', ',', '{', '}', '[', ']']
 
-number_variables = {}
-variables = {}
+class Obfuscator(object):
+	
+	def __init__(self):
+		self.header_variables = {}
+		self.variables = {}
 
-# Header includes stuff like pre-processed integers
-def getHeader():
-	global number_variables
-	global variables
-	return ";".join("{}={}".format(number_variables[number], variables[number_variables[number]]) for number in sorted(number_variables, key = lambda x: len(number_variables[x]))) + "\n"
+	# Header includes stuff like pre-processed integers
+	def getHeader(self):
+		return ";".join("{}={}".format(self.header_variables[number], self.variables[self.header_variables[number]]) for number in sorted(self.header_variables, key = lambda x: len(self.header_variables[x]))) + "\n"
+		
+	def getVariable(self, variableName):
+		pass
 
-def addNumberToVars(number="", expression=""):
-	global number_variables
-	global variables
-	
-	if FORCE_NO_HEADER:
-		return expression
-	
-	# 0 and 1 are used for number processing, so we should pre-process it before it is actually needed
-	if ('0' not in number_variables) or ('1' not in number_variables):
+	def addHeaderVar(self, varName, expression):
+				
+		if varName in self.header_variables:
+			return self.header_variables[varName]
 		
-		# Add 0 to the number variables
-		variable_name = '_' * (len(variables) + 1)
-		variables[variable_name] = '((()==[])+(()==[]))'
-		#variables[variable_name] = '({0}^{0})'.format(number_variables['1'])
-		number_variables['0'] = variable_name
-		
-		# Add 1 to the number variables
-		variable_name = '_' * (len(variables) + 1)
-		#variables[variable_name] = '((()==())+(()==[]))'
-		variables[variable_name] = '({0}**{0})'.format(number_variables['0'])		# 1 = 0**0
-		number_variables['1'] = variable_name
-		
-	if number == "":
-		return
-		
-	if number in number_variables:
-		return number_variables[number]
-		
-	# if the variable list is already too big,
-	# it is better to just use the expression
-	if len(expression) < (len(variables) + 1) + 2:
-		return expression
-		
-	variable_name = '_' * (len(variables) + 1)
-	variables[variable_name] = expression
-	number_variables[number] = variable_name
-	
-	return variable_name
-	
-
-def encodeNumber(number):
-	global number_variables
-	global variables
-		
-	if int(number) < 0:
-		#return "(~{}*{})".format(encodeNumber('0'), encodeNumber(abs(int(number))))		# Not working for some reason
-		return "(({}-{})*{})".format(encodeNumber('0'), encodeNumber('1'), encodeNumber(-int(number)))
-		
-	number = str(number)
-		
-	if number in number_variables:
-		return variables[number_variables[number]]
-		
-	# Try to avoid adding a header unless you really need to
-	if number == '0':
-		return '((()==[])+(()==[]))'
-	elif number == '1':
-		return '((()==())+(()==[]))'
-		
-	else:
-		if ('0' not in number_variables) or ('1' not in number_variables):
-			addNumberToVars()
-		
-		'''
-		# Simpler way for smaller numbers
-		if int(number) <= 4:
-			expression = "({})".format("+".join([number_variables['1']] * int(number)))
+		# if the variable list is already too big,
+		# it is better to just use the expression
+		if len(expression) < (len(self.variables) + 1) + 2:
 			return expression
-		'''
+		
+		variable_name = '_' * (len(self.variables) + 1)
+		self.variables[variable_name] = expression
+		self.header_variables[varName] = variable_name
+	
+		return variable_name
+	
+
+	def encodeNumber(self, number, addToHeader = False):
+		
+		
+		if int(number) < 0:
+			return "(~([]==())*{})".format(self.encodeNumber(abs(int(number))))		# Not working for some reason
+			#return "(({}-{})*{})".format(self.encodeNumber('0'), self.encodeNumber('1'), self.encodeNumber(-int(number)))
+		
+		number = str(number)
+		
+		if number in self.header_variables:
+			return self.variables[self.header_variables[number]]
+		
+		
+		if number == '0':
+			return '((()==[])+(()==[]))'
+		elif number == '1':
+			return '((()==())+(()==[]))'
+		
+		else:
+			# Try to avoid adding a header unless you really need to
 			
-		# Convert a number to binary, then encode
-		# eg.	13 	=> 1101 (binary)	=> (1 << 3)+(1 << 2)+(1 << 0)
-		bin_number = bin(int(number))[2:]
-		shifts = 0
-		obf_number = ''
-		while bin_number != '':
-			if bin_number[-1] == '1':
+			if ('0' not in self.header_variables):
+				self.addHeaderVar('0', '((()==[])+(()==[]))')
+				self.addHeaderVar('1', '({0}**{0})'.format(self.header_variables['0']))
+			
+			# Convert a number to binary, then encode
+			# eg.	13 	=> 1101 (binary)	=> (1 << 3)+(1 << 2)+(1 << 0)
+			bin_number = bin(int(number))[2:]
+			shifts = 0
+			obf_number = ''
+			while bin_number != '':
+				if bin_number[-1] == '1':
 				
-				if str(1<<shifts) in number_variables:
-					obf_number += number_variables[str(1<<shifts)]
-					
-				elif shifts >= 1:
-					bit_m1 = addNumberToVars(str(1 << (shifts-1)), encodeNumber(str(1 << (shifts-1))))
-					obf_number += '({}<<{})'.format(bit_m1, encodeNumber('1'))
-				else:
-					encode_bitshift = encodeNumber(str(shifts))
-					obf_number += '({}<<{})'.format(number_variables['1'], encode_bitshift)
+					if shifts == 0:
+						obf_number += self.encodeNumber(1)
 						
-				obf_number += '+'
+					elif str(1<<shifts) in self.header_variables:
+						obf_number += self.header_variables[str(1<<shifts)]
+					
+					elif str(shifts) in self.header_variables:
+						encode_bitshift = self.header_variables[str(shifts)]
+						obf_number += '({}<<{})'.format(self.header_variables['1'], encode_bitshift)
+						
+					else:
+						bit_m1 = self.encodeNumber(str(1 << (shifts-1)), True)
+						obf_number += '({}<<{})'.format(bit_m1, self.encodeNumber('1'))
+						
+					obf_number += '+'
 			
-			bin_number = bin_number[:-1]
-			shifts += 1
-		obf_number = "({})".format(obf_number[:-1])
-		return obf_number
-		#return addNumberToVars(number, obf_number)
+				bin_number = bin_number[:-1]
+				shifts += 1
+			if bin_number.count('1') == 1:
+				obf_number = obf_number[:-1]
+			else:
+				obf_number = "({})".format(obf_number[:-1])
+			
+			if addToHeader:
+				return self.addHeaderVar(number, obf_number)
+			return obf_number
 		
-def encodeString(string):
+	def encodeString(self, string, addToHeader = False, forceHexstrings = False):
 	
-	if USE_HEXSTRINGS:
-		byte_array = "[{}]".format(",".join([hex(ord(c)) for c in string[1:-1]]))
-	else:
-		byte_array = "[{}]".format(",".join([encodeNumber(ord(c)) for c in string[1:-1]]))
-	
-	result = "''.join(chr({0}) for {0} in {1})".format(RESERVED_VAR, byte_array)
-	return result
+		if USE_HEXSTRINGS or forceHexstrings:
+			#byte_array = "[{}]".format(",".join([hex(ord(c)) for c in string]))
+			#result = "str(''.join(chr({0}) for {0} in {1}))".format(RESERVED_VAR, byte_array)
+			result = "'{}'".format("".join("\\x{:02x}".format(ord(c)) for c in string))
+		else:
+			byte_array = "[{}]".format(",".join([self.encodeNumber(ord(c)) for c in string]))
+			result = "str(''.join(chr({0}) for {0} in {1}))".format(RESERVED_VAR, byte_array)
+		
+		if addToHeader:
+			return self.addHeaderVar(string, result)
+		return result
 				
 
-def obfuscate(code, append_header = True):
-	global number_variables
-	global variables
+	def obfuscate(self, code, append_header = True):
 	
-	global PREPAD
-	global REPLACEMENTS
-	
-	# import statements should just be returned
-	if code.split()[0] in ['import', 'from']:
-		return code
+		# import statements should just be returned
+		if code.split()[0] in ['import', 'from']:
+			return code
 		
-	# Pad certain characters so they can be parsed properly
-	prepadded = code
-	for p in PREPAD:
-		prepadded = prepadded.replace(p, " {} ".format(p))
-	prepadded = prepadded.replace('(', "( ").replace(')', ' )')
+		# Pad certain characters so they can be parsed properly
+		prepadded = code
+		for p in PREPAD:
+			prepadded = prepadded.replace(p, " {} ".format(p))
+		prepadded = prepadded.replace('(', "( ").replace(')', ' )')
 	
-	result = ''
-	parsingQuote = ''
-	lineCommented = False
+		result = ''
+		parsingQuote = ''
+		lineCommented = False
 	
-	for symbol in prepadded.split():
+		for symbol in prepadded.split():
 		
-		# Check if the rest of the line is commented
-		if symbol[0] == '#':
-			if REMOVE_COMMENTS:
-				return
-			lineCommented = True
+			# Check if the rest of the line is commented
+			if symbol[0] == '#':
+				if REMOVE_COMMENTS:
+					return
+				lineCommented = True
 			
-		if lineCommented:
-			result += symbol + ' '
-			continue
+			if lineCommented:
+				result += symbol + ' '
+				continue
 		
-		# If you encounter a string
-		if (parsingQuote == '') and (symbol[0] in ["\"", "\'"]):
-			parsingQuote = symbol + ' '
-			continue
-			'''
-			if (symbol[0] == symbol[-1]) and (symbol != ''):
-				result += encodeString(symbol)
-				result += symbol
-			else:
+			# If you encounter a string
+			if (parsingQuote == '') and (symbol[0] in ["\"", "\'"]):
 				parsingQuote = symbol + ' '
-			continue
-			'''
+				continue
 		
-		if parsingQuote != '':
-			if (symbol.find(parsingQuote[0]) != -1):
-				parsingQuote += symbol[:symbol.find(parsingQuote[0])+1]
-				result += encodeString(parsingQuote)
-				parsingQuote = ''
-			else:
-				parsingQuote += symbol + ' '
-			continue
+			# when it reaches the end of the string
+			if parsingQuote != '':
+				if (symbol.find(parsingQuote[0]) != -1):
+					parsingQuote += symbol[:symbol.find(parsingQuote[0])+1]
+					result += self.encodeString(parsingQuote[1:-1])
+					parsingQuote = ''
+				else:
+					parsingQuote += symbol + ' '
+				continue
 			
 			
-		# Reserved words are passed along with spacing
-		if symbol in RESERVED + BUILT_IN:
-			result += " {} ".format(symbol)
-			continue
+			# Reserved words are passed along with spacing
+			if symbol in _RESERVED:
+				result += " {} ".format(symbol)
+				continue
+			
 		
-		# arithmetic and similar symbols are passed along as well
-		if symbol in PREPAD:
+			# arithmetic and similar symbols are passed along as well
+			if symbol in PREPAD:
+				result += symbol
+				continue
+		
+			# special replacements
+			if symbol in REPLACEMENTS:
+				result += REPLACEMENTS[symbol]
+				continue
+		
+			# if we find a number
+			if symbol.isdigit():
+				result += self.encodeNumber(int(symbol))
+				continue
+		
+			# Try to find the name of a variable / function
+			name = ""
+			for s in symbol:
+				if s in string.ascii_letters + '_':
+					name += s
+				elif name:
+					#if name in self.variables
+					if name[0] in string.digits:
+						name = ""
+					
+			if name in _BUILT_IN:
+				
+				if OBFUSCATE_BUILTINS:
+					if BUILTINS_CONST not in self.header_variables:
+						self.addHeaderVar(BUILTINS_CONST, self.encodeString('builtins'))
+					
+					enc_name = self.addHeaderVar(name, self.encodeString(name))
+					result += "getattr(__import__({}), {})".format(self.header_variables[BUILTINS_CONST], enc_name)
+					result += symbol[len(name):]
+				else:
+					result += symbol
+					
+				continue
+		
+			# If it is a variable/function, replace the old variable name with a new one
+			if (name != "") and (name not in _RESERVED) and (name not in _BUILT_IN):
+				if name not in self.variables:
+					self.variables[name] = '_' * (len(self.variables) + 1)
+				result += self.variables[name] + symbol[len(name):]
+				continue
+		
+			# If there aren't any changes, just use the original code
 			result += symbol
-			continue
-		
-		# special replacements
-		if symbol in REPLACEMENTS:
-			result += REPLACEMENTS[symbol]
-			continue
-		
-		# Try to parse  it if it is an integer
-		try:
-			result += encodeNumber(int(symbol))
-			continue
-		except:
-			pass			
-		
-		# Try to find the name of a variable / function
-		name = ""
-		for s in symbol:
-			if s in string.ascii_letters + '_':
-				name += s
-			elif name not in variables:
-				name = ""
-		
-		# If it is a variable/function, replace the old variable name with a new one
-		if (name != "") and (name not in RESERVED) and (name not in BUILT_IN):
-			if name not in variables:
-				variables[name] = '_' * (len(variables) + 1)
-			result += variables[name] + symbol[len(name):]
-			continue
-		
-		# If there aren't any changes, just use the original code
-		result += symbol
 	
-	# restore original indentation
-	indents = ""
-	i = 0
-	while code[i] in ['\t', ' ']:
-		indents += code[i]
-		i += 1
-	result = indents + result.strip()
+		# restore original indentation
+		indents = ""
+		i = 0
+		while code[i] in ['\t', ' ']:
+			indents += code[i]
+			i += 1
+		result = indents + result.strip()
 	
-	if append_header and (len(number_variables) > 0):
-		return getHeader() + result
+		if append_header and (len(self.header_variables) > 0):
+			return getHeader() + result
 		
-	return result
+		return result
 	
-# For processing multiple lines at once
-def obfuscate_lines(code):
-	result = ""
-	for line in code.split('\n'):
-		if line:
-			result += obfuscate(line, False) + "\n"
-	return getHeader() + result
+	# For processing multiple lines at once
+	def obfuscate_lines(self, code):
+		
+		str_start = -1
+		strings = []
+		
+		# get all strings in the code
+		for i, c in enumerate(code):
+			if (c in ['\'', '\"']) and (code[i-1] != '\\'):
+				if str_start == -1:
+					str_start = i
+				elif c == code[str_start]:
+					strings.append(code[str_start : i+1])
+					str_start = -1
+					
+		# encode all the strings, and store them as variables in the header
+		string_vars = {}
+		for s in strings:
+			encoded_str = self.encodeString(s[1:-1])
+			string_vars[s] = self.addHeaderVar(s, encoded_str)
+			
+		for s in string_vars:
+			code = code.replace(s, string_vars[s])
+			
+		
+		result = ""
+		for line in code.split('\n'):
+			if not line:
+				continue
+			
+			result += self.obfuscate(line, False) + "\n"
+		return self.getHeader() + result
 
-
-#encodeNumber('16')
-
-#SAMPLE_CODE = 'x = 5'
-#SAMPLE_CODE = 'for i in range(5): print([random.randrange(j+11) for j in range(13)]);'
-#SAMPLE_CODE = 'print(sum(random.randrange(j+11) for j in range(7, 13)))'
-
-#print(obfuscate(SAMPLE_CODE))
-#print("The square root of " + str(n) + " is " + str(x))
-# √
-#print("The square root of " + str(n) + " = " + str(x))
-
-# This example calculates the square root of n
-SAMPLE_CODE = """
-n = 17; x = 1
-for i in range(100): x = x - ((x**2 - n) / (2*x))
-print(x)
-"""
-
-with open('test.py', 'w') as fh:
-	output = "".join(list(obfuscate_lines(SAMPLE_CODE)))
-	fh.write(output)
+def main():
+	if len(sys.argv) < 3:
+		print('Usage: obfuscator.py inputfile outputfile')
+	else:
+		with open(sys.argv[1], 'r') as fh:
+			lines = fh.read()
+			
+		obf = Obfuscator()
+		output = obf.obfuscate_lines(lines)
+		print(output)
+			
+		with open(sys.argv[2], 'w') as fh:
+			fh.write(output)
+			
+		'''
+		print('VARIABLES')
+		for v in obf.variables:
+			print("{}\t=> {}".format(v, obf.variables[v]))
 	
-	print('Written to test.py')
+		print('\nVARIABLES IN HEADER')
+		for n in sorted(obf.header_variables, key = lambda x: int(x)):
+			print("{}\t=> {}".format(n, obf.header_variables[n]))
+		print()
+		'''
+		print('Written to {}'.format(sys.argv[2]))
+		
 
-#
-print('Output test run: \n')
-subprocess.call('python test.py', shell=True)
-	
-
-
-
-'''
-print("VARIABLES")
-print(variables)
-print()
-
-print("OUTPUT")
-print(output)
-
-'''
-#print()
-#exec(output)
+if __name__ == "__main__":
+	main()
