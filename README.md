@@ -42,8 +42,7 @@ In Python, we can call a built-in function indirectly ```getattr(__import__('bui
 To call other functions, we would just use either of the two string encoding methods above.
 
 Input:
-```print(chr(65))
-```
+```print(chr(65))```
 Output:
 ```_=str(''.join(chr(__RSV) for __RSV in [0x62,0x75,0x69,0x6c,0x74,0x69,0x6e,0x73]));__=str(''.join(chr(__RSV) for __RSV in [0x70,0x72,0x69,0x6e,0x74]));___=str(''.join(chr(__RSV) for __RSV in [0x63,0x68,0x72]));____=((()==[])+(()==[]));_____=(____**____);______=((_____<<_____));_______=((______<<(____**____)));________=((_______<<(____**____)));_________=((________<<(____**____)));__________=((_________<<(____**____)))
 getattr(__import__(_), __)(getattr(__import__(_), ___)(((____**____)+(__________<<(____**____)))))
