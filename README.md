@@ -6,7 +6,7 @@ Seeing that baffled me at first sight, but after reading [/u/ntxhhf's breakdown]
 *What exactly does this script do?*  
 It takes your regular-looking Python code, and obfuscates it! It takes any specified Python script, and will attempt to create an equivalent script that has the *same exact* functionality as the original, but is incredibly difficult for humans to read regularly.
 
-*"So... how is this useful?"*  
+*So... how is this useful?*  
 According to [Wikipedia](https://en.wikipedia.org/wiki/Obfuscation_(software))...
 > Programmers may deliberately obfuscate code to conceal its purpose (security through obscurity) or its logic or implicit values embedded in it, primarily, in order to prevent tampering, deter reverse engineering, or even as a puzzle or recreational challenge for someone reading the source code.
 
