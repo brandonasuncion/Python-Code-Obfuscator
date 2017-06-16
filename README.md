@@ -48,7 +48,8 @@ To call other functions, we would just use either of the two string encoding met
 
 **Input:**
 ```python
-print(chr(65))```
+print(chr(65))
+```
 
 **Output:**
 ```python
