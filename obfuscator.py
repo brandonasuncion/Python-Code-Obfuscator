@@ -1,24 +1,26 @@
-#!/usr/bin/python
-'''
-Python Code Obfuscator
-by Brandon Asuncion
-	me@brandonasuncion.tech
-'''
+#!/usr/bin/env python3
+
+
+#	Python Code Obfuscator
+#	by Brandon Asuncion
+#	
+#	Questions/Comments?	me@brandonasuncion.tech
+
 
 import string
 import sys
+import argparse
 
 # How strings are encoded
 #	Turning off will remove all numbers in the code,
 #	but will increase output size by a lot!
 USE_HEXSTRINGS = True
 
+# Obfuscate Python's built-in function calls
+OBFUSCATE_BUILTINS = False
+
 # Remove comments from code
 REMOVE_COMMENTS = True
-
-# Obfuscate Python's built-in function calls
-# 	Note: Code output will be large!
-OBFUSCATE_BUILTINS = False
 
 # Special code replacements
 REPLACEMENTS = {
@@ -26,10 +28,9 @@ REPLACEMENTS = {
 	'False': '(()==[])',
 }
 
-# Name of variable for internal actions (such as string decryption)
-RESERVED_VAR = "__RSV"
-
-BUILTINS_CONST = "__B"
+# Ignore the following two constants if you don't know what they mean
+RESERVED_VAR = "__RSV"		# Name of variable for internal actions (such as string decryption)
+BUILTINS_CONST = "__B"		# name used in the header for storing the "builtins" string
 
 _RESERVED = [
 	# Python reserved keywords
@@ -59,7 +60,7 @@ _BUILT_IN = [
 ]
 
 # Might not be a complete list...
-PREPAD = [';', ':', '=', '+', '-', '*', '%', '^', '<<', '>>', '|', '^', '/', ',', '{', '}', '[', ']']
+_PREPAD = [';', ':', '=', '+', '-', '*', '%', '^', '<<', '>>', '|', '^', '/', ',', '{', '}', '[', ']']
 
 class Obfuscator(object):
 	
@@ -174,7 +175,7 @@ class Obfuscator(object):
 		
 		# Pad certain characters so they can be parsed properly
 		prepadded = code
-		for p in PREPAD:
+		for p in _PREPAD:
 			prepadded = prepadded.replace(p, " {} ".format(p))
 		prepadded = prepadded.replace('(', "( ").replace(')', ' )')
 	
@@ -217,7 +218,7 @@ class Obfuscator(object):
 			
 		
 			# arithmetic and similar symbols are passed along as well
-			if symbol in PREPAD:
+			if symbol in _PREPAD:
 				result += symbol
 				continue
 		
@@ -310,33 +311,40 @@ class Obfuscator(object):
 			
 			result += self.obfuscate(line, False) + "\n"
 		return self.getHeader() + result
+		
+class MyArgParser(argparse.ArgumentParser):
+	def error(self, message):
+		sys.stderr.write('Error: {}\n'.format(message))
+		self.print_help()
+		sys.exit(2)
 
 def main():
-	if len(sys.argv) < 3:
-		print('Usage: obfuscator.py inputfile outputfile')
-	else:
-		with open(sys.argv[1], 'r') as fh:
-			lines = fh.read()
+	parser = MyArgParser(description='Python Code Obfuscator by Brandon Asuncion (me@brandonasuncion.tech)')
+	parser.add_argument('inputfile', help="Name of the input file")
+	parser.add_argument('outputfile', help="Name of the output file")
+	parser.add_argument('--debug', help="Show debug info", action="store_true")
+	args = vars(parser.parse_args())
+		
+	print('Opening {} for obfuscation'.format(args['inputfile']))
+	with open(args['inputfile'], 'r') as fh:
+		lines = fh.read()
+		
+	obf = Obfuscator()
+	output = obf.obfuscate_lines(lines)
+		
+	with open(args['outputfile'], 'w') as fh:
+		fh.write(output)
+		print('Written to {}\n'.format(args['outputfile']))
 			
-		obf = Obfuscator()
-		output = obf.obfuscate_lines(lines)
-		print(output)
-			
-		with open(sys.argv[2], 'w') as fh:
-			fh.write(output)
-			
-		'''
-		print('VARIABLES')
+	if args['debug']:
+		print('CONVERTED VARIABLES')
 		for v in obf.variables:
 			print("{}\t=> {}".format(v, obf.variables[v]))
-	
+
 		print('\nVARIABLES IN HEADER')
-		for n in sorted(obf.header_variables, key = lambda x: int(x)):
+		for n in sorted(obf.header_variables, key=len):
 			print("{}\t=> {}".format(n, obf.header_variables[n]))
-		print()
-		'''
-		print('Written to {}'.format(sys.argv[2]))
-		
+		print()		
 
 if __name__ == "__main__":
 	main()
