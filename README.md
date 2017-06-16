@@ -11,15 +11,17 @@ According to [Wikipedia](https://en.wikipedia.org/wiki/Obfuscation_(software))..
 > Programmers may deliberately obfuscate code to conceal its purpose (security through obscurity) or its logic or implicit values embedded in it, primarily, in order to prevent tampering, deter reverse engineering, or even as a puzzle or recreational challenge for someone reading the source code.
 
 ## Usage
-> usage: obfuscator.py [-h] [--debug] inputfile outputfile
->
-> positional arguments:
->   inputfile   Name of the input file
->   outputfile  Name of the output file
->
-> optional arguments:
->   -h, --help  show this help message and exit
->   --debug     Show debug info
+```
+usage: obfuscator.py [-h] [--debug] inputfile outputfile
+
+positional arguments:
+  inputfile   Name of the input file
+  outputfile  Name of the output file
+
+optional arguments:
+  -h, --help  show this help message and exit
+  --debug     Show debug info
+ ```
 
 ## Examples
 
