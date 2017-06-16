@@ -4,7 +4,7 @@ I was browsing /r/dailyprogrammer on Reddit one day, and attempted one of the [d
 Seeing that baffled me at first sight, but after reading [/u/ntxhhf's breakdown](https://www.reddit.com/r/dailyprogrammer/comments/2ao99p/7142014_challenge_171_easy_hex_to_8x8_bitmap/ciza4c9/) of his code, I was inspired to make my own code obfuscator for Python using the ideas in his post.
 
 ## Usage
-```$ python obfuscator.py inputfile outputfile
+``` $ python obfuscator.py inputfile outputfile
 ```
 
 ## Examples
@@ -26,7 +26,7 @@ print(_______)
 There are two ways the parser can encrypt strings. The first way is with hex strings, and the other using the number encoding method above.
 
 Input:
-```print("Hello World!")
+``` print("Hello World!")
 ```
 
 Hex Strings:
