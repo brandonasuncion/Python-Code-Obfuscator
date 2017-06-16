@@ -25,7 +25,7 @@ optional arguments:
 
 ## Examples
 
-### Hiding Numerical Values
+### Masking Numerical Values
 
 **Input:** Using Netwon's Method to find the square root of 17
 ```python
@@ -78,16 +78,16 @@ getattr(__import__(_), __)(getattr(__import__(_), ___)(((____**____)+(__________
 ## Mini-FAQ
 * **Should I use this for distributing my source code?**  
 As of the time I'm writing this, I highly recommend against that idea. There are some instances of code in that the parser cannot handle (multi-line strings, for instance). Also, the output really won't do much to prevent reverse-engineering.
-* **The output is too big! How do I reduce the output size?**
+* **The output is too big! How do I reduce the output size?**  
 As of right now, the biggest impact is the inefficiency of encoding strings. For the smallest output, make sure to set the following constants in the script:
    ```
    USE_HEXSTRINGS = True
    OBFUSCATE_BUILTINS = False
    REMOVE_COMMENTS = True
    ```
-* **It's still too big!**
+* **It's still too big!**  
 That wasn't a question. But yes, I will be doing periodic optimizations to this project when I have time. After all, it is just a side-project for me! :)
-* **Is there a license?**
+* **Is there a license?**  
 Yes, it is currently distributed under the [Apache License 2.0](https://choosealicense.com/licenses/apache-2.0/).
 
 ## Credits
