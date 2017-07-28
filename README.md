@@ -10,6 +10,64 @@ It takes your regular-looking Python code, and obfuscates it! It takes any speci
 According to [Wikipedia](https://en.wikipedia.org/wiki/Obfuscation_(software))...
 > Programmers may deliberately obfuscate code to conceal its purpose (security through obscurity) or its logic or implicit values embedded in it, primarily, in order to prevent tampering, deter reverse engineering, or even as a puzzle or recreational challenge for someone reading the source code.
 
+## Examples
+
+### Masking Numerical Values
+
+**Input:** Using Netwon's Method to find the square root of 17
+```python
+n = 17; x = 1
+for i in range(100): x = x - ((x**2 - n) / (2*x))
+print(x)
+```
+**Output:**
+```python
+__=((()==[])+(()==[]));___=(__**__);____=((___<<___));_____=((____<<(__**__)));______=((_____<<(__**__)));
+_________=((___<<_____));__________=((((___<<_____))<<(__**__)));_=((__**__)+(______<<(__**__)));_______=(__**__)
+for ________ in range((_____+(_________<<(__**__))+(__________<<(__**__)))):
+    _______=_______-((_______**((___<<___))-_)/(((___<<___))*_______))
+print(_______)
+```
+
+### Obfuscating Strings
+There are two ways the parser can encrypt strings. The first way is with hex strings, and the other using the number encoding method above.
+
+**Example Input:** `print("Hello World!")`
+
+**Output**
+```python
+_=((()==[])+(()==[]));__=(_**_);___=((__<<__));____=((___<<(_**_)));_____=((__<<____));______=((_____<<(_**_)));
+_______=str(''.join(chr(__RSV) for __RSV in [((____<<(_**_))+(______<<(_**_))),((_**_)+____+______+(((_____<<(_**_)))<<(_**_))),
+(____+(((___<<(_**_)))<<(_**_))+______+(((_____<<(_**_)))<<(_**_))),(____+(((___<<(_**_)))<<(_**_))+______+(((_____<<(_**_)))<<(_**_))),
+((_**_)+___+____+(((___<<(_**_)))<<(_**_))+______+(((_____<<(_**_)))<<(_**_))),((_____<<(_**_))),((_**_)+___+____+_____+(((_____<<(_**_)))<<(_**_))),
+((_**_)+___+____+(((___<<(_**_)))<<(_**_))+______+(((_____<<(_**_)))<<(_**_))),(___+_____+______+(((_____<<(_**_)))<<(_**_))),
+(____+(((___<<(_**_)))<<(_**_))+______+(((_____<<(_**_)))<<(_**_))),(____+______+(((_____<<(_**_)))<<(_**_))),((_**_)+______)]))
+print(_______)
+```
+
+### Hiding Calls to Python's Built-In Functions
+In Python, we can call a built-in function indirectly: `getattr(__import__('builtins'), 'abs')(5)`  
+So to call a function, we just use the string-encoding method detailed above. It's definitely not space-efficient, but it works!
+
+**Input:** `print(chr(65))`  
+
+**Output:**
+```python
+_=((()==[])+(()==[]));__=(_**_);___=((__<<__));____=((___<<(_**_)));
+_____=((____<<(_**_)));______=((_____<<(_**_)));_______=((((_____<<(_**_)))<<(_**_)));
+________=str(''.join(chr(__RSV) for __RSV in [((__<<__)+(______<<(_**_))+(_______<<(_**_))),
+((_**_)+____+______+_______+(((((_____<<(_**_)))<<(_**_)))<<(_**_))),
+((_**_)+_____+_______+(((((_____<<(_**_)))<<(_**_)))<<(_**_))),(____+_____+_______+(((((_____<<(_**_)))<<(_**_)))<<(_**_))),
+(____+______+_______+(((((_____<<(_**_)))<<(_**_)))<<(_**_))),((_**_)+_____+_______+(((((_____<<(_**_)))<<(_**_)))<<(_**_))),
+(___+____+_____+_______+(((((_____<<(_**_)))<<(_**_)))<<(_**_))),((_**_)+___+______+_______+(((((_____<<(_**_)))<<(_**_)))<<(_**_)))]));
+_________=str(''.join(chr(__RSV) for __RSV in [(______+_______+(((((_____<<(_**_)))<<(_**_)))<<(_**_))),
+(___+______+_______+(((((_____<<(_**_)))<<(_**_)))<<(_**_))),((_**_)+_____+_______+(((((_____<<(_**_)))<<(_**_)))<<(_**_))),
+(___+____+_____+_______+(((((_____<<(_**_)))<<(_**_)))<<(_**_))),(____+______+_______+(((((_____<<(_**_)))<<(_**_)))<<(_**_)))]));
+__________=str(''.join(chr(__RSV) for __RSV in [((_**_)+___+_______+(((((_____<<(_**_)))<<(_**_)))<<(_**_))),
+(_____+_______+(((((_____<<(_**_)))<<(_**_)))<<(_**_))),(___+______+_______+(((((_____<<(_**_)))<<(_**_)))<<(_**_)))]))
+getattr(__import__(________), _________)(getattr(__import__(________), __________)(((_**_)+(((((_____<<(_**_)))<<(_**_)))<<(_**_)))))
+```
+
 ## Usage
 ```
 usage: obfuscator.py [-h] [--debug] inputfile outputfile
@@ -23,58 +81,6 @@ optional arguments:
   --debug     Show debug info
  ```
 
-## Examples
-
-### Masking Numerical Values
-
-**Input:** Using Netwon's Method to find the square root of 17
-```python
-n = 17; x = 1
-for i in range(100): x = x - ((x**2 - n) / (2*x))
-print(x)
-```
-**Output:**
-```python
-__=((()==[])+(()==[]));___=(__**__);____=((___<<___));_____=((____<<(__**__)));______=((_____<<(__**__)));_________=((___<<_____));__________=((((___<<_____))<<(__**__)))
-_=((__**__)+(______<<(__**__)));_______=(__**__)
-for ________ in range((_____+(_________<<(__**__))+(__________<<(__**__)))):_______=_______-((_______**((___<<___))-_)/(((___<<___))*_______))
-print(_______)
-```
-
-### Obfuscating Strings
-There are two ways the parser can encrypt strings. The first way is with hex strings, and the other using the number encoding method above.
-
-**Example Input:**
-`print("Hello World!")`
-
-#### Using Number Encoding:
-Encoding strings is not very efficient using this sort of algorithm, but it works!
-```python
-_=((()==[])+(()==[]));__=(_**_);___=((__<<__));____=((___<<(_**_)));_____=((__<<____));______=((_____<<(_**_)));_______=str(''.join(chr(__RSV) for __RSV in [((____<<(_**_))+(______<<(_**_))),((_**_)+____+______+(((_____<<(_**_)))<<(_**_))),(____+(((___<<(_**_)))<<(_**_))+______+(((_____<<(_**_)))<<(_**_))),(____+(((___<<(_**_)))<<(_**_))+______+(((_____<<(_**_)))<<(_**_))),((_**_)+___+____+(((___<<(_**_)))<<(_**_))+______+(((_____<<(_**_)))<<(_**_))),((_____<<(_**_))),((_**_)+___+____+_____+(((_____<<(_**_)))<<(_**_))),((_**_)+___+____+(((___<<(_**_)))<<(_**_))+______+(((_____<<(_**_)))<<(_**_))),(___+_____+______+(((_____<<(_**_)))<<(_**_))),(____+(((___<<(_**_)))<<(_**_))+______+(((_____<<(_**_)))<<(_**_))),(____+______+(((_____<<(_**_)))<<(_**_))),((_**_)+______)]))
-print(str(''.join(chr(__RSV) for __RSV in [((____<<(_**_))+(______<<(_**_))),((_**_)+____+______+(((_____<<(_**_)))<<(_**_))),(____+(((___<<(_**_)))<<(_**_))+______+(((_____<<(_**_)))<<(_**_))),(____+(((___<<(_**_)))<<(_**_))+______+(((_____<<(_**_)))<<(_**_))),((_**_)+___+____+(((___<<(_**_)))<<(_**_))+______+(((_____<<(_**_)))<<(_**_))),((_____<<(_**_))),((_**_)+___+____+_____+(((_____<<(_**_)))<<(_**_))),((_**_)+___+____+(((___<<(_**_)))<<(_**_))+______+(((_____<<(_**_)))<<(_**_))),(___+_____+______+(((_____<<(_**_)))<<(_**_))),(____+(((___<<(_**_)))<<(_**_))+______+(((_____<<(_**_)))<<(_**_))),(____+______+(((_____<<(_**_)))<<(_**_))),((_**_)+______)])))
-```
-
-#### Hex Strings:
-```python
-_='\x48\x65\x6c\x6c\x6f\x20\x57\x6f\x72\x6c\x64\x21'
-print('\x48\x65\x6c\x6c\x6f\x20\x57\x6f\x72\x6c\x64\x21')
-```
-
-### Hiding Calls to Python's Built-In Functions
-In Python, we can call a built-in function indirectly `getattr(__import__('builtins'), 'abs')(5)`.
-To call other functions, we would just use either of the two string encoding methods above.
-
-**Input:**
-```python
-print(chr(65))
-```
-
-**Output:**
-```python
-_=str(''.join(chr(__RSV) for __RSV in [0x62,0x75,0x69,0x6c,0x74,0x69,0x6e,0x73]));__=str(''.join(chr(__RSV) for __RSV in [0x70,0x72,0x69,0x6e,0x74]));___=str(''.join(chr(__RSV) for __RSV in [0x63,0x68,0x72]));____=((()==[])+(()==[]));_____=(____**____);______=((_____<<_____));_______=((______<<(____**____)));________=((_______<<(____**____)));_________=((________<<(____**____)));__________=((_________<<(____**____)))
-getattr(__import__(_), __)(getattr(__import__(_), ___)(((____**____)+(__________<<(____**____)))))
-```
-
 ## Mini-FAQ
 * **Should I use this for distributing my source code?**  
 As of the time I'm writing this, I highly recommend against that idea. There are some instances of code in that the parser cannot handle (multi-line strings, for instance). Also, the output really won't do much to prevent reverse-engineering.
@@ -85,10 +91,8 @@ As of right now, the biggest impact is the inefficiency of encoding strings. For
    OBFUSCATE_BUILTINS = False
    REMOVE_COMMENTS = True
    ```
-* **It's still too big!**  
-That wasn't a question. But yes, I will be doing periodic optimizations to this project when I have time. After all, it is just a side-project for me! :)
 * **Is there a license?**  
-Yes, it is currently distributed under the [Apache License 2.0](https://choosealicense.com/licenses/apache-2.0/).
+[Apache License 2.0](https://choosealicense.com/licenses/apache-2.0/).
 
 ## Credits
 * Brandon Asuncion - Code  

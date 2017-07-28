@@ -14,7 +14,7 @@ import argparse
 # How strings are encoded
 #	Turning off will remove all numbers in the code,
 #	but will increase output size by a lot!
-USE_HEXSTRINGS = True
+USE_HEXSTRINGS = False
 
 # Obfuscate Python's built-in function calls
 OBFUSCATE_BUILTINS = False
