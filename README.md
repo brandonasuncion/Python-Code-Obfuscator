@@ -96,5 +96,5 @@ As of right now, the biggest impact is the inefficiency of encoding strings. For
 
 ## Credits
 * Brandon Asuncion - Code  
-    Questions/Comments? Feel free to contact me at: **me@brandonasuncion.tech**
+    Questions/Comments? Feel free to contact me at: **me@brandonasuncion.dev**
 * [/u/ntxhhf](https://www.reddit.com/r/dailyprogrammer/comments/2ao99p/7142014_challenge_171_easy_hex_to_8x8_bitmap/ciza4c9/) - For the idea, and his breakdown of using lists/sets to create boolean values and integers
